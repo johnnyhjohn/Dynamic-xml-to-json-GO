@@ -57,26 +57,29 @@ func main() {
 	for node := nodeProducts.FirstChild; node != nil; node = node.NextSibling {
 		// Buscamos o Node de product, pode ser feito dinamico colocando em uma função como parâmetro
 		productNode := xmlquery.FindOne(node, "//PRODUCT")
-		if productNode != nil { // Validação se não encontrou, pode retornar vazio caso não encontre ou haja espaços
-			dinamicValue := DinamicValues{}
-			newValue := map[string]interface{}{}
-			// Loop para percorrermos o node de PRODUCT
-			for product := productNode.FirstChild; product != nil; product = product.NextSibling {
-				// Eliminamos os espaços em branco do node e valor,
-				// pode ser que a leitura retorne apenas espaçoes em branco
-				nodeIsNotBlank := strings.TrimSpace(product.Data) != ""
-				valueIsNotBlank := strings.TrimSpace(product.InnerText()) != ""
-				// Verificamos se não estão vazios e atribuimos ao nosso newValue
-				if nodeIsNotBlank && valueIsNotBlank {
-					// Atribuimos dinamicamente o nome da key com o nome da tag
-					newValue[product.Data] = product.InnerText()
-					// Atribuimos direto o valor ao Value pois a cada loop que ele passar aqui irá ter um valor a mais
-					dinamicValue.Value = newValue
-				}
-			}
-			// Atribuimos o array de product no content
-			contentWithValues.AddItemToDinamicList(dinamicValue)
+		// Validação se não encontrou, pode retornar vazio caso não encontre ou haja espaços
+		if productNode == nil {
+			continue
 		}
+		dinamicValue := DinamicValues{}
+		newValue := map[string]interface{}{}
+		// Loop para percorrermos o node de PRODUCT
+		for product := productNode.FirstChild; product != nil; product = product.NextSibling {
+			// Eliminamos os espaços em branco do node e valor,
+			// pode ser que a leitura retorne apenas espaçoes em branco
+			nodeIsBlank := strings.TrimSpace(product.Data) == ""
+			valueIsBlank := strings.TrimSpace(product.InnerText()) == ""
+			// Verificamos se não estão vazios e atribuimos ao nosso newValue
+			if nodeIsBlank && valueIsBlank {
+				continue
+			}
+			// Atribuimos dinamicamente o nome da key com o nome da tag
+			newValue[product.Data] = product.InnerText()
+			// Atribuimos direto o valor ao Value pois a cada loop que ele passar aqui irá ter um valor a mais
+			dinamicValue.Value = newValue
+		}
+		// Atribuimos o array de product no content
+		contentWithValues.AddItemToDinamicList(dinamicValue)
 	}
 
 	// Transformamos nosso array em json
