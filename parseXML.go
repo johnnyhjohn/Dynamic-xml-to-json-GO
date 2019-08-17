@@ -15,16 +15,16 @@ import (
 )
 
 type Contents struct {
-	Values []DinamicValues
+	Values []DynamicValues
 }
 
-type DinamicValues struct {
+type DynamicValues struct {
 	Value map[string]interface{}
 }
 
 // Função para fazer append na lista de contents
-func (contents *Contents) AddItemToDinamicList(dinamicValue DinamicValues) []DinamicValues {
-	contents.Values = append(contents.Values, dinamicValue)
+func (contents *Contents) AddItemToDynamicList(dynamicValue DynamicValues) []DynamicValues {
+	contents.Values = append(contents.Values, dynamicValue)
 	return contents.Values
 }
 
@@ -32,13 +32,13 @@ func (contents *Contents) AddItemToDinamicList(dinamicValue DinamicValues) []Din
 *
 *   @author Johnny John
 *
-*   @param { xmlquery.Node } - Estrutura xml que iremos ler e gravar em DinamicValues
+*   @param { xmlquery.Node } - Estrutura xml que iremos ler e gravar em DynamicValues
 *   @return {map[string]interface} - Retornamos um map de string que montamos dinamicamente
 *
 *   @desc
 *   Método responsavel por enriquecer o objeto com os valores parseados do xml dinamicamente
  */
-func (dinamicValue *DinamicValues) enrichDinamicValue(nodeToTransform *xmlquery.Node) map[string]interface{} {
+func (dynamicValue *DynamicValues) enrichDynamicValue(nodeToTransform *xmlquery.Node) map[string]interface{} {
 
 	newValue := map[string]interface{}{}
 	// Loop para percorrermos o node de PRODUCT
@@ -54,15 +54,15 @@ func (dinamicValue *DinamicValues) enrichDinamicValue(nodeToTransform *xmlquery.
 		// Atribuimos dinamicamente o nome da key com o nome da tag
 		newValue[product.Data] = product.InnerText()
 		// Atribuimos direto o valor ao Value pois a cada loop que ele passar aqui irá ter um valor a mais
-		dinamicValue.Value = newValue
+		dynamicValue.Value = newValue
 	}
 
-	return dinamicValue.Value
+	return dynamicValue.Value
 }
 
 func main() {
 
-	valuesToInput := []DinamicValues{}
+	valuesToInput := []DynamicValues{}
 	contentWithValues := Contents{valuesToInput}
 
 	// Abertura do xml
@@ -93,12 +93,12 @@ func main() {
 		if productNode == nil {
 			continue
 		}
-		dinamicValue := DinamicValues{}
-		// Alimentamos nossa variavel dinamicValue com os dados dentro da estrutura do Node "PRODUCT" do indice atual
+		dynamicValue := DynamicValues{}
+		// Alimentamos nossa variavel dynamicValue com os dados dentro da estrutura do Node "PRODUCT" do indice atual
 		// Passamos o node como parâmetro no método para alimentar nossa variavel com os valores
-		dinamicValue.enrichDinamicValue(productNode)
+		dynamicValue.enrichDynamicValue(productNode)
 		// Atribuimos o array de product no content
-		contentWithValues.AddItemToDinamicList(dinamicValue)
+		contentWithValues.AddItemToDynamicList(dynamicValue)
 	}
 
 	// Transformamos nosso array em json
