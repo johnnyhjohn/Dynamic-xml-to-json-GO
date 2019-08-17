@@ -28,6 +28,38 @@ func (contents *Contents) AddItemToDinamicList(dinamicValue DinamicValues) []Din
 	return contents.Values
 }
 
+/**
+*
+*   @author Johnny John
+*
+*   @param { xmlquery.Node } - Estrutura xml que iremos ler e gravar em DinamicValues
+*   @return {map[string]interface} - Retornamos um map de string que montamos dinamicamente
+*
+*   @desc
+*   Método responsavel por enriquecer o objeto com os valores parseados do xml dinamicamente
+ */
+func (dinamicValue *DinamicValues) enrichDinamicValue(nodeToTransform *xmlquery.Node) map[string]interface{} {
+
+	newValue := map[string]interface{}{}
+	// Loop para percorrermos o node de PRODUCT
+	for product := nodeToTransform.FirstChild; product != nil; product = product.NextSibling {
+		// Eliminamos os espaços em branco do node e valor,
+		// pode ser que a leitura retorne apenas espaçoes em branco
+		nodeIsBlank := strings.TrimSpace(product.Data) == ""
+		valueIsBlank := strings.TrimSpace(product.InnerText()) == ""
+		// Verificamos se não estão vazios e atribuimos ao nosso newValue
+		if nodeIsBlank && valueIsBlank {
+			continue
+		}
+		// Atribuimos dinamicamente o nome da key com o nome da tag
+		newValue[product.Data] = product.InnerText()
+		// Atribuimos direto o valor ao Value pois a cada loop que ele passar aqui irá ter um valor a mais
+		dinamicValue.Value = newValue
+	}
+
+	return dinamicValue.Value
+}
+
 func main() {
 
 	valuesToInput := []DinamicValues{}
@@ -62,22 +94,9 @@ func main() {
 			continue
 		}
 		dinamicValue := DinamicValues{}
-		newValue := map[string]interface{}{}
-		// Loop para percorrermos o node de PRODUCT
-		for product := productNode.FirstChild; product != nil; product = product.NextSibling {
-			// Eliminamos os espaços em branco do node e valor,
-			// pode ser que a leitura retorne apenas espaçoes em branco
-			nodeIsBlank := strings.TrimSpace(product.Data) == ""
-			valueIsBlank := strings.TrimSpace(product.InnerText()) == ""
-			// Verificamos se não estão vazios e atribuimos ao nosso newValue
-			if nodeIsBlank && valueIsBlank {
-				continue
-			}
-			// Atribuimos dinamicamente o nome da key com o nome da tag
-			newValue[product.Data] = product.InnerText()
-			// Atribuimos direto o valor ao Value pois a cada loop que ele passar aqui irá ter um valor a mais
-			dinamicValue.Value = newValue
-		}
+		// Alimentamos nossa variavel dinamicValue com os dados dentro da estrutura do Node "PRODUCT" do indice atual
+		// Passamos o node como parâmetro no método para alimentar nossa variavel com os valores
+		dinamicValue.enrichDinamicValue(productNode)
 		// Atribuimos o array de product no content
 		contentWithValues.AddItemToDinamicList(dinamicValue)
 	}
